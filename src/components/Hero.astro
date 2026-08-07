@@ -3,14 +3,33 @@ import { site } from "../data/site";
 import { categories } from "../data/categories";
 
 const premiere = categories[0];
+
+// Classes écrites en entier, Tailwind ne verrait pas une variante construite à la volée
+const badge = site.disponible
+  ? "border-dispo/30 bg-dispo/10 text-dispo"
+  : "border-indispo/30 bg-indispo/10 text-indispo";
+const point = site.disponible ? "bg-dispo" : "bg-indispo";
+const statut = site.disponible ? site.texteDispo : site.texteIndispo;
 ---
 
 <section id="profil" class="max-w-5xl mx-auto px-6 pt-14 pb-10 lg:pt-20 lg:pb-12">
   <div class="grid lg:grid-cols-[1.15fr_1fr] gap-12 lg:gap-16 items-center">
     <div>
-      <p class="flex items-center gap-2.5 text-xs tracking-[0.18em] uppercase mb-10">
-        <span class="w-1.5 h-1.5 rounded-full bg-finops"></span>
-        Disponible pour des missions
+      <p
+        class:list={[
+          "inline-flex items-center gap-2.5 mb-10 pl-3 pr-4 py-2 rounded-full border text-[13px] font-medium tracking-[0.14em] uppercase",
+          badge,
+        ]}
+      >
+        <span class="relative flex w-2 h-2 shrink-0">
+          {
+            site.disponible && (
+              <span class="absolute inline-flex w-full h-full rounded-full bg-dispo opacity-75 animate-ping motion-reduce:hidden" />
+            )
+          }
+          <span class:list={["relative inline-flex w-2 h-2 rounded-full", point]}></span>
+        </span>
+        {statut}
       </p>
 
       <h1
@@ -49,21 +68,21 @@ const premiere = categories[0];
         <span class="ml-2 text-[11px] font-mono text-muted/60">~/profil</span>
       </div>
       <div class="p-5 font-mono text-[13px] leading-6">
-        <p><span class="text-muted/50">$</span> <span class="text-accent">whoami</span></p>
-        <p class="text-bone mb-4">{site.terminal.role}</p>
+        <p><span class="text-muted/50">$&nbsp;</span><span class="text-accent">whoami</span></p>
+        {site.terminal.roles.map((r) => <p class="text-bone">{r}</p>)}
 
-        <p><span class="text-muted/50">$</span> <span class="text-accent">cat stack.txt</span></p>
+        <p class="mt-6">
+          <span class="text-muted/50">$&nbsp;</span><span class="text-accent">cat stack.txt</span>
+        </p>
         {site.terminal.stack.map((l) => <p class="text-bone">{l}</p>)}
 
-        <p class="mt-4">
-          <span class="text-muted/50">$</span>
-          <span class="text-accent">cat certifs.txt</span>
+        <p class="mt-6">
+          <span class="text-muted/50">$&nbsp;</span><span class="text-accent">cat certifs.txt</span>
         </p>
         {site.terminal.certifs.map((l) => <p class="text-bone">{l}</p>)}
 
-        <p class="mt-4">
-          <span class="text-muted/50">$</span>
-          <span class="text-bone animate-pulse">▊</span>
+        <p class="mt-6">
+          <span class="text-muted/50">$&nbsp;</span><span class="text-bone animate-pulse">▊</span>
         </p>
       </div>
     </div>

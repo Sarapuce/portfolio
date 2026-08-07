@@ -1,4 +1,9 @@
 export const site = {
+  // false fait passer le badge du hero au rouge et change les textes
+  disponible: true as boolean,
+  texteDispo: "Disponible pour des missions",
+  texteIndispo: "En mission, plus de disponibilité pour le moment",
+
   nom: "Alexandre Hervé",
   titre: "J'audite des infrastructures cloud.",
   description:
@@ -11,8 +16,12 @@ export const site = {
   bio: "Une phrase ou deux sur ton parcours, ce qui t'intéresse et le type de mission que tu cherches.",
   phraseContact: "Une phrase d'accroche à écrire.",
   terminal: {
-    role: "Auditeur FinOps & sécurité cloud",
+    roles: ["Auditeur FinOps & sécurité cloud", "DevSecOps"],
     stack: ["AWS, GCP, Terraform, Kubernetes", "Python, Go, Grafana"],
-    certifs: ["FinOps Certified Practitioner", "AWS Security Specialty"],
+    certifs: [
+      "AWS Certified Security - Specialty",
+      "Certified Kubernetes Security Specialist",
+      "Root-Me : top 0.08%",
+    ],
   },
 };

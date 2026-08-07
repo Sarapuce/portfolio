@@ -3,16 +3,21 @@ import { site } from "../data/site";
 import { categories } from "../data/categories";
 
 const labels = categories.map((c) => c.label.toLowerCase()).join(" et ");
+
+// Les labels ne se recollent qu'à la phrase de disponibilité, l'autre se suffit
+const statut = site.disponible
+  ? `${site.texteDispo} ${labels}.`
+  : `${site.texteIndispo}.`;
 ---
 
 <section id="contact" class="max-w-5xl mx-auto px-6 py-24 lg:py-32">
   <div class="border-t border-line pt-16">
-    <h2 class="font-display font-medium text-4xl sm:text-5xl text-bone leading-tight mb-6 max-w-xl">
+    <h2
+      class="font-display font-medium text-4xl sm:text-5xl text-bone leading-tight max-w-xl mb-6"
+    >
       {site.phraseContact}
     </h2>
-    <p class="text-muted mb-12 max-w-lg">
-      Disponible pour des missions {labels}.
-    </p>
+    <p class="text-muted mb-12 max-w-lg">{statut}</p>
 
     <a
       href={`mailto:${site.email}`}
