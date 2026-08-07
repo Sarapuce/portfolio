@@ -1,0 +1,47 @@
+---
+import { site } from "../data/site";
+import { categories } from "../data/categories";
+
+const labels = categories.map((c) => c.label);
+---
+
+<section
+  id="contact"
+  class="border-t border-line bg-gradient-to-b from-base to-surface py-24"
+>
+  <div class="max-w-3xl mx-auto px-4 text-center">
+    <h2 class="text-3xl md:text-4xl font-bold text-white mb-5">Une phrase d'accroche</h2>
+    <p class="text-lg text-slate-400 mb-10">
+      Disponible pour des missions {labels.join(" et ").toLowerCase()}.
+    </p>
+
+    <div class="flex flex-col sm:flex-row justify-center gap-4">
+      <a
+        href={site.linkedin}
+        target="_blank"
+        rel="noopener"
+        class="inline-flex justify-center items-center py-4 px-8 rounded-lg bg-surface border border-line text-white font-bold hover:border-slate-600 transition-colors"
+      >
+        LinkedIn
+      </a>
+      <a
+        href={`mailto:${site.email}`}
+        class="inline-flex justify-center items-center gap-2 py-4 px-8 rounded-lg bg-accent text-base font-bold hover:bg-cyan-400 transition-all hover:scale-105 shadow-lg shadow-accent/25"
+      >
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+          ></path>
+        </svg>
+        Écris-moi
+      </a>
+    </div>
+
+    <p class="mt-14 text-sm text-slate-600">
+      © {new Date().getFullYear()} {site.nom}
+    </p>
+  </div>
+</section>

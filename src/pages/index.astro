@@ -1,0 +1,19 @@
+---
+import Base from "../layouts/Base.astro";
+import Nav from "../components/Nav.astro";
+import Hero from "../components/Hero.astro";
+import CategorieSection from "../components/CategorieSection.astro";
+import Contact from "../components/Contact.astro";
+import { categories } from "../data/categories";
+---
+
+<Base>
+  <Nav />
+  <Hero />
+  {
+    categories.map((c, i) => (
+      <CategorieSection categorie={c} numero={i + 1} />
+    ))
+  }
+  <Contact />
+</Base>

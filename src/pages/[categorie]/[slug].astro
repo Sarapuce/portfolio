@@ -1,0 +1,88 @@
+---
+import { getCollection, render } from "astro:content";
+import Base from "../../layouts/Base.astro";
+import Nav from "../../components/Nav.astro";
+import { getCategorie } from "../../data/categories";
+import { categorieDe, slugDe } from "../../data/missions";
+import { site } from "../../data/site";
+
+export async function getStaticPaths() {
+  const missions = await getCollection("missions");
+  return missions.map((m) => ({
+    params: { categorie: categorieDe(m), slug: slugDe(m) },
+    props: { mission: m },
+  }));
+}
+
+const { mission } = Astro.props;
+const categorie = getCategorie(categorieDe(mission))!;
+const c = categorie.couleur;
+const { titre, resume, perimetre, duree, verdict, tags } = mission.data;
+const { Content } = await render(mission);
+---
+
+<Base title={`${titre} | ${site.nom}`} description={resume}>
+  <Nav />
+
+  <article class="max-w-3xl mx-auto px-4 py-16">
+    <a
+      href={`/#${categorie.id}`}
+      class="inline-flex items-center gap-2 text-sm text-slate-400 hover:text-accent transition-colors mb-10"
+    >
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M10 19l-7-7 7-7M3 12h18"></path>
+      </svg>
+      {categorie.label}
+    </a>
+
+    <h1 class="text-3xl md:text-4xl font-extrabold text-white tracking-tight mb-4">
+      {titre}
+    </h1>
+    <p class="text-lg text-slate-400 mb-12">{resume}</p>
+
+    {
+      (perimetre || duree || verdict) && (
+        <div class="grid sm:grid-cols-3 gap-4 mb-4">
+          {perimetre && (
+            <div class="bg-surface border border-line rounded-lg p-4">
+              <p class="text-xs uppercase text-slate-500 mb-1">Périmètre</p>
+              <p class="text-white font-semibold">{perimetre}</p>
+            </div>
+          )}
+          {duree && (
+            <div class="bg-surface border border-line rounded-lg p-4">
+              <p class="text-xs uppercase text-slate-500 mb-1">Durée</p>
+              <p class="text-white font-semibold">{duree}</p>
+            </div>
+          )}
+          {verdict && (
+            <div class="bg-surface border border-line rounded-lg p-4">
+              <p class="text-xs uppercase text-slate-500 mb-1">Verdict</p>
+              <p class:list={["font-semibold", c.texte]}>{verdict}</p>
+            </div>
+          )}
+        </div>
+      )
+    }
+
+    <div class="prose">
+      <Content />
+    </div>
+
+    {
+      tags.length > 0 && (
+        <div class="mt-16 pt-8 border-t border-line flex flex-wrap gap-2">
+          {tags.map((t) => (
+            <span class="text-xs font-mono text-slate-500 bg-line px-2 py-1 rounded">
+              {t}
+            </span>
+          ))}
+        </div>
+      )
+    }
+  </article>
+</Base>

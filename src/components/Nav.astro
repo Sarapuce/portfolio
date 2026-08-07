@@ -1,0 +1,96 @@
+---
+import { site } from "../data/site";
+import { categories } from "../data/categories";
+
+const [prenom, ...reste] = site.nom.split(" ");
+const nom = reste.join(" ");
+---
+
+<header class="sticky top-0 z-50 bg-base/80 backdrop-blur border-b border-line">
+  <nav class="max-w-6xl mx-auto px-4">
+    <div class="flex items-center justify-between h-16">
+      <a href="/" class="text-xl font-extrabold text-white tracking-tight uppercase">
+        {prenom}<span class="text-accent"> {nom}</span>
+      </a>
+
+      <div class="hidden md:flex items-center gap-1 text-sm">
+        <a href="/#profil" class="px-3 py-2 rounded-md hover:text-accent transition-colors">
+          Profil
+        </a>
+        {
+          categories.map((c) => (
+            <a
+              href={`/#${c.id}`}
+              class="px-3 py-2 rounded-md hover:text-accent transition-colors"
+            >
+              {c.label}
+            </a>
+          ))
+        }
+        <a
+          href="/#contact"
+          class="ml-2 px-4 py-2 rounded-md border border-accent text-accent font-semibold hover:bg-accent hover:text-base transition-all"
+        >
+          Contact
+        </a>
+      </div>
+
+      <button id="menu-btn" class="md:hidden text-white p-2" aria-label="Menu">
+        <svg
+          id="menu-icon"
+          class="w-6 h-6 transition-transform"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M4 6h16M4 12h16M4 18h16"></path>
+        </svg>
+      </button>
+    </div>
+
+    <div id="menu" class="hidden md:hidden pb-4 space-y-1">
+      <a href="/#profil" class="block px-3 py-3 rounded-md text-white hover:text-accent">
+        Profil
+      </a>
+      {
+        categories.map((c) => (
+          <a
+            href={`/#${c.id}`}
+            class="block px-3 py-3 rounded-md text-white hover:text-accent"
+          >
+            {c.label}
+          </a>
+        ))
+      }
+      <a
+        href="/#contact"
+        class="block px-3 py-3 rounded-md border border-accent text-accent font-semibold text-center mt-3"
+      >
+        Contact
+      </a>
+    </div>
+  </nav>
+</header>
+
+<script>
+  const btn = document.getElementById("menu-btn")!;
+  const menu = document.getElementById("menu")!;
+  const icon = document.getElementById("menu-icon")!;
+
+  const toggle = () => {
+    menu.classList.toggle("hidden");
+    icon.classList.toggle("rotate-90");
+  };
+
+  btn.addEventListener("click", toggle);
+
+  menu.querySelectorAll("a").forEach((lien) => {
+    lien.addEventListener("click", () => {
+      if (!menu.classList.contains("hidden")) toggle();
+    });
+  });
+</script>
