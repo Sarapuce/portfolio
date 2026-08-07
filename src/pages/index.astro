@@ -9,11 +9,9 @@ import { categories } from "../data/categories";
 
 <Base>
   <Nav />
-  <Hero />
-  {
-    categories.map((c, i) => (
-      <CategorieSection categorie={c} numero={i + 1} />
-    ))
-  }
-  <Contact />
+  <main>
+    <Hero />
+    {categories.map((c) => <CategorieSection categorie={c} />)}
+    <Contact />
+  </main>
 </Base>

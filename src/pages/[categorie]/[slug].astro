@@ -19,53 +19,47 @@ const categorie = getCategorie(categorieDe(mission))!;
 const c = categorie.couleur;
 const { titre, resume, perimetre, duree, verdict, tags } = mission.data;
 const { Content } = await render(mission);
+
+const meta = [
+  { cle: "Périmètre", val: perimetre, accent: false },
+  { cle: "Durée", val: duree, accent: false },
+  { cle: "Verdict", val: verdict, accent: true },
+].filter((m) => m.val);
 ---
 
-<Base title={`${titre} | ${site.nom}`} description={resume}>
+<Base title={`${titre} — ${site.nom}`} description={resume}>
   <Nav />
 
-  <article class="max-w-3xl mx-auto px-4 py-16">
+  <article class="max-w-3xl mx-auto px-6 py-20">
     <a
       href={`/#${categorie.id}`}
-      class="inline-flex items-center gap-2 text-sm text-slate-400 hover:text-accent transition-colors mb-10"
+      class="inline-flex items-center gap-2.5 text-xs tracking-[0.2em] uppercase hover:text-bone transition-colors mb-12"
     >
-      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          stroke-width="2"
-          d="M10 19l-7-7 7-7M3 12h18"></path>
-      </svg>
+      <span class:list={["w-1.5 h-1.5 rounded-full", c.point]}></span>
       {categorie.label}
     </a>
 
-    <h1 class="text-3xl md:text-4xl font-extrabold text-white tracking-tight mb-4">
+    <h1
+      class="font-display font-medium text-4xl sm:text-5xl lg:text-6xl text-bone leading-[1.05] tracking-tight mb-6"
+    >
       {titre}
     </h1>
-    <p class="text-lg text-slate-400 mb-12">{resume}</p>
+    <p class="text-lg text-muted max-w-2xl mb-14">{resume}</p>
 
     {
-      (perimetre || duree || verdict) && (
-        <div class="grid sm:grid-cols-3 gap-4 mb-4">
-          {perimetre && (
-            <div class="bg-surface border border-line rounded-lg p-4">
-              <p class="text-xs uppercase text-slate-500 mb-1">Périmètre</p>
-              <p class="text-white font-semibold">{perimetre}</p>
+      meta.length > 0 && (
+        <dl class="grid sm:grid-cols-3 gap-px bg-line border border-line rounded-md overflow-hidden mb-4">
+          {meta.map((m) => (
+            <div class="bg-base p-5">
+              <dt class="text-[11px] tracking-[0.15em] uppercase text-muted/60 mb-2">
+                {m.cle}
+              </dt>
+              <dd class:list={[m.accent ? c.texte : "text-bone", "font-medium"]}>
+                {m.val}
+              </dd>
             </div>
-          )}
-          {duree && (
-            <div class="bg-surface border border-line rounded-lg p-4">
-              <p class="text-xs uppercase text-slate-500 mb-1">Durée</p>
-              <p class="text-white font-semibold">{duree}</p>
-            </div>
-          )}
-          {verdict && (
-            <div class="bg-surface border border-line rounded-lg p-4">
-              <p class="text-xs uppercase text-slate-500 mb-1">Verdict</p>
-              <p class:list={["font-semibold", c.texte]}>{verdict}</p>
-            </div>
-          )}
-        </div>
+          ))}
+        </dl>
       )
     }
 
@@ -75,9 +69,10 @@ const { Content } = await render(mission);
 
     {
       tags.length > 0 && (
-        <div class="mt-16 pt-8 border-t border-line flex flex-wrap gap-2">
-          {tags.map((t) => (
-            <span class="text-xs font-mono text-slate-500 bg-line px-2 py-1 rounded">
+        <div class="mt-20 pt-8 border-t border-line flex flex-wrap gap-x-3 gap-y-2 text-xs font-mono text-muted/60">
+          {tags.map((t, i) => (
+            <span>
+              {i > 0 && "· "}
               {t}
             </span>
           ))}

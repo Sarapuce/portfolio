@@ -1,15 +1,15 @@
 export const site = {
-  nom: "Prénom Nom",
-  titre: "FinOps & sécurité cloud",
+  nom: "Alexandre Hervé",
+  titre: "J'audite des infrastructures cloud.",
   description:
-    "Audits FinOps et sécurité cloud. Ce que votre infrastructure coûte vraiment, et ce qu'elle expose.",
-  email: "olo76olo@gmail.com",
+    "Audits FinOps et sécurité cloud. Ce que votre infrastructure coûte vraiment, et ce qu'elle expose vraiment.",
+  email: "alexandre.herve97@gmail.com",
   linkedin: "https://www.linkedin.com/in/",
-  github: "https://github.com/",
+  github: "https://github.com/Sarapuce",
   cv: "/cv.pdf",
-  accroche:
-    "J'audite les infrastructures cloud sur deux angles : ce qu'elles coûtent vraiment, et ce qu'elles exposent vraiment.",
+  accroche: "Ce qu'elles coûtent vraiment, et ce qu'elles exposent vraiment.",
   bio: "Une phrase ou deux sur ton parcours, ce qui t'intéresse et le type de mission que tu cherches.",
+  phraseContact: "Une phrase d'accroche à écrire.",
   terminal: {
     role: "Auditeur FinOps & sécurité cloud",
     stack: ["AWS, GCP, Terraform, Kubernetes", "Python, Go, Grafana"],

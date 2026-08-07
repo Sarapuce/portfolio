@@ -1,0 +1,72 @@
+---
+import type { Categorie } from "../data/categories";
+import { lienDe, type Mission } from "../data/missions";
+
+interface Props {
+  mission: Mission;
+  categorie: Categorie;
+}
+
+const { mission, categorie } = Astro.props;
+const { titre, badge, resume, constats, verdict, tags } = mission.data;
+const c = categorie.couleur;
+---
+
+<a
+  href={lienDe(mission)}
+  class:list={[
+    "group block border-t border-line py-8 transition-colors duration-300",
+    c.trait,
+  ]}
+>
+  <div class="flex items-baseline justify-between gap-6">
+    <h3
+      class="font-display font-medium text-2xl sm:text-3xl text-bone leading-snug group-hover:text-accent transition-colors duration-300"
+    >
+      {titre}
+    </h3>
+
+    <div class="flex items-baseline gap-5 shrink-0">
+      {
+        verdict && (
+          <span class:list={["hidden sm:block font-mono text-sm", c.texte]}>
+            {verdict}
+          </span>
+        )
+      }
+      <span
+        class="text-muted group-hover:text-accent group-hover:translate-x-1 transition-all duration-300"
+      >
+        →
+      </span>
+    </div>
+  </div>
+
+  <div
+    class="grid grid-rows-[1fr] md:grid-rows-[0fr] md:group-hover:grid-rows-[1fr] transition-[grid-template-rows] duration-500 ease-out"
+  >
+    <div class="overflow-hidden">
+      <div class="pt-4 max-w-2xl">
+        <p class="text-muted">{resume}</p>
+
+        {
+          constats.length > 0 && (
+            <ul class="mt-4 space-y-1.5 text-sm text-muted/80">
+              {constats.map((p) => (
+                <li class="flex gap-3">
+                  <span class:list={["mt-2 w-1 h-1 rounded-full shrink-0", c.point]} />
+                  <span>{p}</span>
+                </li>
+              ))}
+            </ul>
+          )
+        }
+
+        <div class="mt-5 flex flex-wrap items-center gap-x-3 gap-y-2 text-xs font-mono text-muted/60">
+          <span class:list={[c.texte]}>{badge}</span>
+          {tags.map((t) => <span>· {t}</span>)}
+        </div>
+      </div>
+    </div>
+  </div>
+</a>
