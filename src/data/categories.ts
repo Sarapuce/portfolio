@@ -17,7 +17,7 @@ export const categories: Categorie[] = [
     id: "finops",
     label: "FinOps",
     tagline:
-      "Savoir où part vraiment votre budget cloud. Et récupérer ce qui peut l'être sans rien casser en production.",
+      "Où part votre budget cloud, et ce qu'on peut récupérer sans coupure en prod.",
     couleur: {
       texte: "text-finops",
       point: "bg-finops",
@@ -28,7 +28,7 @@ export const categories: Categorie[] = [
     id: "securite",
     label: "Sécurité Cloud",
     tagline:
-      "Trouver vos failles avant qu'on ne les trouve pour vous. Et passer vos audits de conformité sans mauvaise surprise.",
+      "Vos failles avant qu'on ne les trouve pour vous, et la conformité sans surprise.",
     couleur: {
       texte: "text-secu",
       point: "bg-secu",

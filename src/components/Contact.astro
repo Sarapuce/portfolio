@@ -1,23 +1,25 @@
 ---
 import { site } from "../data/site";
-import { categories } from "../data/categories";
 
-const labels = categories.map((c) => c.label.toLowerCase()).join(" et ");
-
-// Les labels ne se recollent qu'à la phrase de disponibilité, l'autre se suffit
-const statut = site.disponible
-  ? `${site.texteDispo} ${labels}.`
-  : `${site.texteIndispo}.`;
+// Quand il est dispo, le badge du hero le dit déjà. On ne le répète que si ça
+// change la décision d'écrire, donc uniquement quand il ne l'est pas.
 ---
 
 <section id="contact" class="max-w-5xl mx-auto px-6 py-24 lg:py-32">
   <div class="border-t border-line pt-16">
     <h2
-      class="font-display font-medium text-4xl sm:text-5xl text-bone leading-tight max-w-xl mb-6"
+      class:list={[
+        "font-display font-medium text-4xl sm:text-5xl text-bone leading-tight max-w-xl",
+        site.disponible ? "mb-12" : "mb-6",
+      ]}
     >
       {site.phraseContact}
     </h2>
-    <p class="text-muted mb-12 max-w-lg">{statut}</p>
+    {
+      !site.disponible && (
+        <p class="text-indispo mb-12 max-w-lg">{site.texteIndispo}.</p>
+      )
+    }
 
     <a
       href={`mailto:${site.email}`}
@@ -33,6 +35,9 @@ const statut = site.disponible
         </a>
         <a href={site.github} target="_blank" rel="noopener" class="hover:text-bone transition-colors">
           GitHub
+        </a>
+        <a href={site.rootme} target="_blank" rel="noopener" class="hover:text-bone transition-colors">
+          Root-Me
         </a>
       </div>
       <p class="text-muted/50">© {new Date().getFullYear()} {site.nom}</p>
