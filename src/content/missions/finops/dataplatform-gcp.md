@@ -34,19 +34,16 @@ parallèle, neutre financièrement.
 
 ## Constats
 
-**Le premier gisement n'est pas technique.** Le socle Cloud SQL éligible à un engagement de
-consommation pesait 11% de la facture mensuelle, facturé intégralement à la demande, sans
-aucun engagement souscrit. À lui seul, le plus gros levier de la revue.
+**Aucun engagement de consommation.** Le socle Cloud SQL éligible pesait 11% de la facture
+mensuelle, facturé intégralement à la demande.
 
 **Du support payé pour rien.** Plusieurs instances tournaient sur des versions PostgreSQL
-en fin de vie et payaient donc le support étendu, environ 3% de la facture annuelle. Aucune
-capacité en face, aucun service rendu, juste le prix du retard de migration.
+en fin de vie et payaient donc le support étendu, environ 3% de la facture annuelle.
 
 **Un dimensionnement décorrélé de l'usage.** Les workloads réservaient plusieurs fois ce
-qu'ils consommaient réellement. C'est coûteux partout, mais surtout sur GKE Autopilot, qui
-facture les requests déclarées et non l'usage constaté : y poser des requests et des limits
-réalistes, calées sur les métriques et différenciées par environnement, suffit à faire
-baisser la facture sans toucher au code.
+qu'ils consommaient réellement. GKE Autopilot facture les requests déclarées et non l'usage
+constaté : y poser des requests et des limits réalistes, calées sur les métriques et
+différenciées par environnement, suffit à faire baisser la facture sans toucher au code.
 
 **Un stockage jamais arbitré.** L'arbitrage entre facturation logique et physique n'avait
 jamais été fait sur BigQuery, alors que le taux de compression mesuré rendait la seconde
@@ -61,18 +58,16 @@ paquet entrant depuis des mois, un load balancer de test, des passerelles orphel
 ## Recommandations
 
 **Décommissionner avant d'optimiser.** Couper le legacy en premier évite de dimensionner
-puis de s'engager sur de la capacité destinée à disparaître. C'est l'erreur classique, celle
-qui verrouille une dépense qu'on s'apprêtait justement à supprimer.
+puis de s'engager sur de la capacité destinée à disparaître.
 
 **Redimensionner sur la mesure, pas sur l'intuition.** Chaque changement a été calé sur 7
 jours de métriques réelles, en conservant volontairement les composants effectivement
 chargés, et en documentant les contraintes de plateforme rencontrées : minimum de mémoire
 imposé, ratios autorisés, risque de saturation au démarrage.
 
-**Gouverner le stockage**, le point aveugle le plus rentable. Basculer BigQuery en
-facturation physique, poser des expirations de partition sur les tables brutes qui n'ont
-plus de valeur une fois la donnée typée, et des cycles de vie sur les buckets.
+**Gouverner le stockage.** Basculer BigQuery en facturation physique, poser des expirations
+de partition sur les tables brutes qui n'ont plus de valeur une fois la donnée typée, et des
+cycles de vie sur les buckets.
 
 **N'engager le socle qu'une fois stable**, sur un montant volontairement inférieur au socle
-permanent, et en excluant les ressources candidates à la suppression. Sinon l'engagement
-devient une dépense contrainte.
+permanent, et en excluant les ressources candidates à la suppression.
