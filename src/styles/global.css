@@ -38,6 +38,32 @@ body::before {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 
+@keyframes curseur {
+  0%,
+  49% {
+    opacity: 1;
+  }
+  50%,
+  100% {
+    opacity: 0;
+  }
+}
+
+.curseur {
+  display: inline-block;
+  width: 0.55em;
+  height: 1em;
+  background: var(--color-bone);
+  transform: translateY(0.15em);
+  animation: curseur 1.05s steps(1, end) infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .curseur {
+    animation: none;
+  }
+}
+
 @keyframes glisse {
   0%,
   100% {
