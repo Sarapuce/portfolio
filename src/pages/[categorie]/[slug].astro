@@ -17,13 +17,14 @@ export async function getStaticPaths() {
 const { mission } = Astro.props;
 const categorie = getCategorie(categorieDe(mission))!;
 const c = categorie.couleur;
-const { titre, resume, perimetre, duree, verdict, tags } = mission.data;
+const { titre, resume, tags } = mission.data;
+const d = mission.data;
 const { Content } = await render(mission);
 
 const meta = [
-  { cle: "Périmètre", val: perimetre, accent: false },
-  { cle: "Durée", val: duree, accent: false },
-  { cle: "Verdict", val: verdict, accent: true },
+  { cle: "Périmètre", val: d.perimetre, detail: d.perimetreDetail, accent: false },
+  { cle: "Durée", val: d.duree, detail: d.dureeDetail, accent: false },
+  { cle: "Verdict", val: d.verdict, detail: d.verdictDetail, accent: true },
 ].filter((m) => m.val);
 ---
 
@@ -56,6 +57,11 @@ const meta = [
               </dt>
               <dd class:list={[m.accent ? c.texte : "text-bone", "font-medium"]}>
                 {m.val}
+                {m.detail && (
+                  <span class="block mt-1 text-xs font-normal text-muted/60">
+                    {m.detail}
+                  </span>
+                )}
               </dd>
             </div>
           ))}

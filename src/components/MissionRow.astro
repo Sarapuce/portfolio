@@ -10,6 +10,9 @@ interface Props {
 const { mission, categorie } = Astro.props;
 const { titre, badge, resume, constats, verdict, tags } = mission.data;
 const c = categorie.couleur;
+
+// Le badge est déjà affiché en tête de ligne, inutile de le répéter dans les tags
+const autresTags = tags.filter((t) => t.toLowerCase() !== badge.toLowerCase());
 ---
 
 <a
@@ -64,7 +67,7 @@ const c = categorie.couleur;
 
         <div class="mt-5 flex flex-wrap items-center gap-x-3 gap-y-2 text-xs font-mono text-muted/60">
           <span class:list={[c.texte]}>{badge}</span>
-          {tags.map((t) => <span>· {t}</span>)}
+          {autresTags.map((t) => <span>· {t}</span>)}
         </div>
       </div>
     </div>

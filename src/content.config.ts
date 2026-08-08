@@ -12,8 +12,11 @@ const missions = defineCollection({
     tags: z.array(z.string()).default([]),
     ordre: z.number().default(0),
     perimetre: z.string().optional(),
+    perimetreDetail: z.string().optional(),
     duree: z.string().optional(),
+    dureeDetail: z.string().optional(),
     verdict: z.string().optional(),
+    verdictDetail: z.string().optional(),
   }),
 });
 
