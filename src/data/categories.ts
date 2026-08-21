@@ -5,6 +5,12 @@ export type Categorie = {
   id: string;
   label: string;
   tagline: string;
+  // Libellés des trois encadrés en haut d'une page. Optionnel, voir libellesDe.
+  libelles?: {
+    perimetre: string;
+    duree: string;
+    verdict: string;
+  };
   couleur: {
     texte: string;
     point: string;
@@ -35,6 +41,24 @@ export const categories: Categorie[] = [
       trait: "group-hover:border-secu",
     },
   },
+  {
+    id: "recherche",
+    label: "Recherche & publications",
+    tagline: "Ce que je cherche en dehors des missions, et ce que j'en publie.",
+    libelles: {
+      perimetre: "Cible",
+      duree: "Publication",
+      verdict: "Impact",
+    },
+    couleur: {
+      texte: "text-recherche",
+      point: "bg-recherche",
+      trait: "group-hover:border-recherche",
+    },
+  },
 ];
 
 export const getCategorie = (id: string) => categories.find((c) => c.id === id);
+
+export const libellesDe = (c: Categorie) =>
+  c.libelles ?? { perimetre: "Périmètre", duree: "Durée", verdict: "Verdict" };

@@ -8,8 +8,9 @@ interface Props {
 }
 
 const { mission, categorie } = Astro.props;
-const { titre, badge, resume, constats, verdict, tags } = mission.data;
+const { titre, badge, resume, constats, verdict, etiquette, tags } = mission.data;
 const c = categorie.couleur;
+const etiquetteRow = etiquette ?? verdict;
 
 // Le badge est déjà affiché en tête de ligne, inutile de le répéter dans les tags
 const autresTags = tags.filter((t) => t.toLowerCase() !== badge.toLowerCase());
@@ -31,9 +32,9 @@ const autresTags = tags.filter((t) => t.toLowerCase() !== badge.toLowerCase());
 
     <div class="flex items-baseline gap-5 shrink-0">
       {
-        verdict && (
+        etiquetteRow && (
           <span class:list={["hidden sm:block font-mono text-sm", c.texte]}>
-            {verdict}
+            {etiquetteRow}
           </span>
         )
       }
