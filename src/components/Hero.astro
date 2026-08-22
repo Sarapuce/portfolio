@@ -10,6 +10,15 @@ const badge = site.disponible
   : "border-indispo/30 bg-indispo/10 text-indispo";
 const point = site.disponible ? "bg-dispo" : "bg-indispo";
 const statut = site.disponible ? site.texteDispo : site.texteIndispo;
+
+const termData = JSON.stringify({
+  whoami: site.terminal.roles,
+  fichiers: {
+    "stack.txt": site.terminal.stack,
+    "certifs.txt": site.terminal.certifs,
+    "flag.txt": ["SARAPUCE{3asY_fl4G}"],
+  },
+});
 ---
 
 <section id="profil" class="max-w-5xl mx-auto px-6 pt-14 pb-10 lg:pt-20 lg:pb-12">
@@ -70,7 +79,7 @@ const statut = site.disponible ? site.texteDispo : site.texteIndispo;
         <span class="w-2 h-2 rounded-full bg-line"></span>
         <span class="ml-2 text-[11px] font-mono text-muted/60">~/sarapuce</span>
       </div>
-      <div class="p-5 font-mono text-[13px] leading-6">
+      <div id="term-body" class="p-5 font-mono text-[13px] leading-6 max-h-[32rem] overflow-y-auto">
         <p><span class="text-muted/50">$&nbsp;</span><span class="text-accent">whoami</span></p>
         {site.terminal.roles.map((r) => <p class="text-bone">{r}</p>)}
 
@@ -84,9 +93,22 @@ const statut = site.disponible ? site.texteDispo : site.texteIndispo;
         </p>
         {site.terminal.certifs.map((l) => <p class="text-bone">{l}</p>)}
 
-        <p class="mt-6">
-          <span class="text-muted/50">$&nbsp;</span><span class="curseur" aria-hidden="true"></span>
-        </p>
+        <div id="term-output"></div>
+
+        <form id="term-form" class="flex items-center mt-6" autocomplete="off">
+          <span class="text-muted/50">$&nbsp;</span>
+          <input
+            id="term-input"
+            type="text"
+            spellcheck="false"
+            autocapitalize="off"
+            autocorrect="off"
+            aria-label="Terminal interactif"
+            class="flex-1 min-w-0 bg-transparent border-0 outline-none text-accent caret-accent font-mono text-[13px] p-0"
+          />
+        </form>
+
+        <script type="application/json" id="term-data" set:html={termData} is:inline></script>
       </div>
     </div>
   </div>
@@ -99,3 +121,91 @@ const statut = site.disponible ? site.texteDispo : site.texteIndispo;
     <span class="indice-scroll">↓</span>
   </a>
 </section>
+
+<script>
+  (function () {
+    const boot = () => {
+      const form = document.getElementById("term-form");
+      if (!form || (form as HTMLElement).dataset.ready) return;
+      const input = document.getElementById("term-input") as HTMLInputElement | null;
+      const out = document.getElementById("term-output");
+      const body = document.getElementById("term-body");
+      const dataEl = document.getElementById("term-data");
+      if (!input || !out || !body || !dataEl) return;
+      (form as HTMLElement).dataset.ready = "1";
+
+      const data = JSON.parse(dataEl.textContent || "{}");
+      const fichiers: Record<string, string[]> = data.fichiers || {};
+      const whoami: string[] = data.whoami || [];
+
+      const ligne = (texte: string, cls: string) => {
+        const p = document.createElement("p");
+        p.className = cls;
+        p.textContent = texte;
+        return p;
+      };
+
+      const executer = (brut: string) => {
+        const bloc = document.createElement("div");
+        bloc.className = "mt-6";
+
+        const echo = document.createElement("p");
+        const invite = document.createElement("span");
+        invite.className = "text-muted/50";
+        invite.textContent = "$ ";
+        const cmd = document.createElement("span");
+        cmd.className = "text-accent";
+        cmd.textContent = brut;
+        echo.append(invite, cmd);
+        bloc.append(echo);
+
+        const args = brut.trim().split(/\s+/).filter(Boolean);
+        const nom = args[0];
+
+        if (nom === "clear") {
+          out.replaceChildren();
+          return;
+        }
+        if (nom === "whoami") {
+          whoami.forEach((l) => bloc.append(ligne(l, "text-bone")));
+        } else if (nom === "ls") {
+          bloc.append(ligne(Object.keys(fichiers).join("  "), "text-bone"));
+        } else if (nom === "cat") {
+          const cibles = args.slice(1);
+          if (cibles.length === 0) {
+            bloc.append(ligne("cat: missing file operand", "text-muted/60"));
+          } else {
+            cibles.forEach((f) => {
+              if (fichiers[f]) {
+                fichiers[f].forEach((l) => bloc.append(ligne(l, "text-bone")));
+              } else {
+                bloc.append(ligne("cat: " + f + ": No such file or directory", "text-muted/60"));
+              }
+            });
+          }
+        } else if (nom === "help") {
+          bloc.append(ligne("commandes : ls, cat, whoami, clear", "text-muted/60"));
+        } else if (nom) {
+          bloc.append(ligne("zsh: command not found: " + nom, "text-muted/60"));
+        }
+
+        out.append(bloc);
+      };
+
+      form.addEventListener("submit", (e) => {
+        e.preventDefault();
+        const val = input.value;
+        input.value = "";
+        executer(val);
+        body.scrollTop = body.scrollHeight;
+      });
+
+      body.addEventListener("click", () => {
+        if (String(window.getSelection() || "") === "") input.focus();
+      });
+    };
+
+    boot();
+    document.addEventListener("astro:page-load", boot);
+  })();
+</script>
