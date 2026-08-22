@@ -17,73 +17,74 @@ verdictDetail: "d'un seul nœud vers cluster-admin"
 etiquette: "SSTIC 2025"
 ---
 
-Recherche menée avec Paul Viossat et présentée au SSTIC 2025. Elle prolonge notre travail de
-l'année précédente sur l'isolation des nœuds. Cette fois on s'est intéressés aux clusters
-dynamiques, ceux dont les nœuds s'allument et s'éteignent tout seuls selon la charge.
+Recherche menée avec Paul Viossat, présentée au SSTIC 2025. Elle prolonge un travail de
+l'année précédente sur l'isolation des nœuds, cette fois appliqué aux clusters dynamiques,
+dont les nœuds démarrent et s'arrêtent automatiquement selon la charge.
 
-## Le point de départ
+## Contexte
 
-La plupart des recherches sur l'isolation Kubernetes partent d'un cluster figé, nœuds déjà
-démarrés. En prod, sur du cloud, ça ne se passe pas comme ça : l'autoscaler crée et supprime
-des nœuds en continu pour coller à la demande. Personne n'avait vraiment regardé cette
-mécanique du point de vue d'un attaquant.
+La plupart des recherches sur l'isolation Kubernetes partent d'un cluster figé, aux nœuds
+déjà démarrés. En production sur le cloud, l'autoscaler crée et supprime des nœuds en continu
+pour suivre la demande. Cette mécanique n'avait pas été étudiée du point de vue d'un
+attaquant.
 
-Notre objectif de départ tenait en une ligne. Partir d'un seul nœud compromis, souvent un
-runner CI/CD mal configuré, et remonter jusqu'au cluster entier.
+L'objectif était de partir d'un seul nœud compromis, typiquement un runner CI/CD mal
+configuré, et de remonter jusqu'au contrôle du cluster entier.
 
 ## La faille
 
-Chaque nœud porte un attribut `providerID` qui pointe vers la machine correspondante chez le
-fournisseur cloud. C'est ce champ que le `cloud-controller-manager` et l'autoscaler
-consultent pour savoir quelle VM démarrer ou supprimer.
+Chaque nœud porte un attribut `providerID` qui identifie la machine correspondante chez le
+fournisseur cloud. Le `cloud-controller-manager` et l'autoscaler s'appuient sur ce champ pour
+déterminer quelle VM démarrer ou supprimer.
 
-Deux comportements anodins pris séparément, mais qui peuvent être exploités ensemble.
+Deux comportements, anodins isolément, deviennent exploitables une fois combinés.
 
-Au démarrage, le kubelet crée lui-même son objet nœud, et personne ne l'empêche d'y écrire le
-`providerID` de son choix. Le champ est réputé immuable une fois posé, mais supprimer le nœud
-puis le recréer suffit à le changer.
+Au démarrage, le kubelet crée lui-même son objet nœud et rien ne l'empêche d'y inscrire le
+`providerID` de son choix. Le champ est réputé immuable une fois posé, mais le supprimer puis
+recréer le nœud suffit à le modifier.
 
-Deuxième point, quand un nœud disparaît, ses identifiants ne sont pas révoqués. Ils restent
-valides quatorze minutes sur AWS, jusqu'à un an sur GKE. On peut donc ressusciter un nœud avec
-les mêmes identifiants et des caractéristiques différentes.
+Second point, les identifiants d'un nœud ne sont pas révoqués à sa suppression. Ils restent
+valides quatorze minutes sur AWS, jusqu'à un an sur GKE. Un nœud supprimé peut donc être
+recréé avec les mêmes identifiants et des caractéristiques différentes.
 
-Mis bout à bout, ça donne un IDOR de second ordre. L'autoscaler agit sur une vraie VM à
-partir d'un identifiant d'un ancien noeud que l'attaquant contrôlait.
+Combinés, ces deux comportements constituent un IDOR de second ordre : l'autoscaler agit sur
+une VM réelle à partir d'un identifiant contrôlé par l'attaquant.
 
-## Ce qu'on en fait
+## Primitives d'exploitation
 
-De là, trois primitives.
+Trois primitives en découlent.
 
-**Recréer un nœud avec les attributs qu'on veut.** On passe par l'autoscaler pour qu'il
-supprime notre propre nœud, puis on le recrée avec les labels et les taints qui nous
-arrangent. Pour empêcher l'API de nettoyer ce faux nœud, un petit émulateur maison,
-[`kne.py`](https://github.com/Sarapuce/kne), le maintient en vie.
+**Recréer un nœud avec des attributs arbitraires.** L'autoscaler est utilisé pour supprimer
+le nœud compromis, qui est ensuite recréé avec les labels et les taints souhaités. Un
+émulateur dédié, [`kne.py`](https://github.com/Sarapuce/kne), maintient ce nœud côté API pour
+éviter qu'il soit nettoyé.
 
-**Supprimer n'importe quel nœud du cluster.** Il suffit de donner à son nœud le `providerID`
-d'un autre : c'est cet autre nœud que l'autoscaler ira supprimer. La machine cible tombe, on
-n'y a jamais mis les pieds.
+**Supprimer n'importe quel nœud du cluster.** En attribuant au nœud contrôlé le `providerID`
+d'un autre nœud, c'est ce dernier que l'autoscaler supprime. La machine cible est détruite
+sans avoir été compromise.
 
-**Attirer un pod sensible.** On combine les deux. On recrée un nœud qui imite la cible d'un
-pod privilégié, on supprime le nœud légitime, et le pod se retrouve reprogrammé chez nous.
+**Attirer un pod sensible.** Les deux primitives combinées permettent de recréer un nœud
+imitant la cible d'un pod privilégié, de supprimer le nœud légitime, et de faire reprogrammer
+le pod sur le nœud contrôlé.
 
-Le scénario complet enchaîne tout ça. Il part d'un runner CI/CD compromis dans un pool isolé
-et se termine sur le nœud admin, dont l'isolation était pourtant bien configurée. Une fois le
-pod admin reprogrammé sur un nœud qu'on contrôle, on émet un token pour son service account,
-et on est `cluster-admin`.
+Le scénario complet part d'un runner CI/CD compromis dans un pool isolé et aboutit au nœud
+admin, dont l'isolation était pourtant correctement configurée. Une fois le pod admin
+reprogrammé sur un nœud contrôlé, un token est émis pour son service account, donnant les
+droits `cluster-admin`.
 
-## S'en protéger
+## Contre-mesures
 
-Le correctif tient en une phrase. Le `providerID` est censé être posé par le
-`cloud-controller-manager`, pas par le kubelet. Une policy d'admission (OPA ou Kyverno) qui
-interdit au kubelet de renseigner son propre `providerID` referme la porte dans la plupart des
-cas.
+Le correctif principal est simple. Le `providerID` doit être posé par le
+`cloud-controller-manager`, pas par le kubelet. Une policy d'admission (OPA ou Kyverno)
+interdisant au kubelet de renseigner son propre `providerID` referme la voie dans la plupart
+des cas.
 
-Reste le problème de fond, plus coriace. Tant que les identifiants d'un nœud survivent à sa
-suppression, la surface d'attaque existe. Le corriger supposerait que les fournisseurs cloud
-revoient leur génération d'identifiants. On leur a remonté le sujet. Ce n'est visiblement pas
-une priorité, et vu la rareté du scénario ça se comprend. Le vrai enseignement est ailleurs.
-Quand l'isolation compte vraiment, mieux vaut séparer les charges dans plusieurs clusters que
-parier sur l'isolation entre nœuds d'un même cluster.
+Le problème de fond est plus difficile. Tant que les identifiants d'un nœud survivent à sa
+suppression, la surface d'attaque demeure. Le corriger supposerait une révision de la
+génération d'identifiants par les fournisseurs cloud ; la vulnérabilité leur a été remontée,
+sans être traitée comme prioritaire compte tenu de la rareté du scénario. En pratique, lorsque
+l'isolation est critique, la séparation des charges dans plusieurs clusters reste plus robuste
+que l'isolation entre nœuds d'un même cluster.
 
 ---
 

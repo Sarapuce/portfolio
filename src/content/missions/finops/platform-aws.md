@@ -34,11 +34,11 @@ Hors périmètre : tout ce qui sortait de la digital factory.
 ## Constats
 
 **Un socle x86 figé.** À la construction, l'écosystème ARM n'était pas prêt, une partie des
-agents et des images de base n'existaient qu'en x86. Ça a changé depuis, personne n'était
-revenu vérifier.
+agents et des images de base n'existaient qu'en x86. L'écosystème a évolué depuis, sans que le
+socle soit réévalué.
 
-**Aucune charge en Spot.** Personne n'avait pris le temps de regarder quels services
-pouvaient encaisser la perte d'un nœud.
+**Aucune charge en Spot.** Les services capables d'encaisser la perte d'un nœud n'avaient
+jamais été identifiés.
 
 **Un autoscaling qui suivait mal.** Le cluster tournait sur l'autoscaler Kubernetes natif,
 qui ne sait que gonfler des node groups déjà déclarés. Karpenter, qui choisit le type

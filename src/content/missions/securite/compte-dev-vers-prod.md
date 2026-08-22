@@ -8,7 +8,7 @@ constats:
   - "Élévation de privilège dans les clusters via la déclaration libre de ressources ArgoCD"
   - "Aucun filtrage réseau entre les pods"
   - "Mots de passe développeurs stockés en clair sur les postes"
-conclusion: "Le périmètre extérieur était bien tenu. À partir d'un compte de développeur, on atteignait la production."
+conclusion: "Le périmètre extérieur était bien tenu. À partir d'un compte de développeur, la production restait atteignable."
 tags: ["EBIOS RM", "GitLab CI", "ArgoCD", "Kubernetes", "IAM"]
 ordre: 1
 perimetre: "4 comptes AWS"
@@ -34,7 +34,7 @@ environnements, évasion de conteneur depuis un runner privilégié, empoisonnem
 interne de la plateforme.
 
 **Élévation de privilège dans AWS.** Certains rôles pouvaient créer une ressource et lui
-attribuer un rôle IAM. De là, on remontait vers des droits qu'on n'avait pas au départ.
+attribuer un rôle IAM. De là, il était possible de remonter vers des droits non détenus au départ.
 
 **Élévation de privilège dans les clusters.** ArgoCD laissait déclarer n'importe quelle
 ressource, sans restriction sur ce qui pouvait être déployé ni où.
@@ -51,7 +51,7 @@ mot de passe en clair sur leur machine.
 privilégié, ce qui ferme la voie d'évasion.
 
 **Resserrage des droits AWS.** Suppression des assume role entre environnements, et retrait
-du droit d'attribuer un rôle IAM à une ressource qu'on vient de créer.
+du droit d'attribuer un rôle IAM à une ressource fraîchement créée.
 
 **Cloisonnement des secrets GitLab.** Seuls les dépôts qui en ont l'usage y accèdent.
 

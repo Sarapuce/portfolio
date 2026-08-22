@@ -18,28 +18,28 @@ verdictDetail: "sur une clé publiée sur GitHub"
 
 ## Le principe
 
-Un honey token, sur AWS, c'est une clé d'accès rattachée à un profil qui n'a strictement
-aucune autorisation. On en génère autant qu'on veut et on les dissémine dans
-l'infrastructure.
+Un honey token, sur AWS, est une clé d'accès rattachée à un profil dépourvu de toute
+autorisation. Il s'en génère autant que nécessaire, disséminées dans l'infrastructure.
 
-Quelqu'un qui met la main dessus va vouloir savoir ce qu'elle vaut. Son premier réflexe sera
-un `aws sts get-caller-identity`. Le premier appel d'API déclenche l'alerte.
+Quiconque met la main dessus cherche à en évaluer la valeur. Le premier réflexe est un
+`aws sts get-caller-identity`. Ce premier appel d'API déclenche l'alerte.
 
 Trois propriétés en découlent :
 
 - la clé ne donne accès à rien, la semer ne crée aucun risque
 - personne n'a de raison légitime de l'utiliser, donc presque aucun faux positif
-- une clé d'accès AWS est une cible évidente, et rien ne la distingue d'une vraie tant qu'on
-  ne s'en sert pas
+- une clé d'accès AWS est une cible évidente, et rien ne la distingue d'une vraie tant
+  qu'elle n'est pas utilisée
 
-C'est un moyen de détection précoce, pas un système de détection. Il dit qu'on est entré, pas
-par où. Il faut des logs et un GuardDuty à côté pour répondre à la deuxième question.
+Il s'agit d'un moyen de détection précoce, pas d'un système de détection complet. Il signale
+qu'une intrusion a eu lieu, pas par où. Des logs et GuardDuty restent nécessaires pour
+répondre à la seconde question.
 
 ## Déployer avec GGCanary
 
 Le module [GGCanary](https://github.com/GitGuardian/ggcanary) de GitGuardian fait le travail.
-La mise en place Terraform est documentée chez eux, je ne la reprends pas ici. Il a fallu
-l'adapter pour Terragrunt.
+Sa mise en place Terraform est documentée par GitGuardian et n'est pas reprise ici ; elle a
+nécessité une adaptation pour Terragrunt.
 
 Le fichier qui compte est `ggcanaries.auto.tfvars`, où se déclarent les tokens :
 
@@ -57,14 +57,14 @@ users = {
 }
 ```
 
-On en crée autant que nécessaire, en les décrivant aussi finement qu'on veut. La limite est
-de 30 tags par token et de 5000 tokens.
+Chaque token peut être décrit aussi finement que voulu, dans la limite de 30 tags par token
+et de 5000 tokens.
 
 ## Où les placer
 
-C'est l'étape difficile. L'objectif est de repérer quelqu'un qui est déjà dans
+C'est l'étape la plus délicate. L'objectif est de repérer un acteur déjà présent dans
 l'infrastructure, pas de récolter des alertes parce qu'un curieux est tombé sur une clé
-exposée publiquement. Le token doit être accessible uniquement à quelqu'un qui a déjà un
+exposée publiquement. Le token doit rester accessible uniquement à qui dispose déjà d'un
 premier accès.
 
 Dans une kill chain cloud, l'escalade passe presque toujours par trois endroits : la CI/CD,
@@ -72,9 +72,9 @@ les workloads applicatifs, les postes de développeurs.
 
 ### CI/CD
 
-Les pipelines ont besoin de credentials AWS pour déployer. On les trouve en clair, oubliés
-dans un historique Git, ou stockés proprement dans un Vault mais extractibles par quelqu'un
-qui sait écrire un workflow.
+Les pipelines ont besoin de credentials AWS pour déployer. Ces credentials se retrouvent en
+clair, oubliés dans un historique Git, ou stockés proprement dans un Vault mais extractibles
+par quiconque sait écrire un workflow.
 
 L'approche GitOps augmente encore le besoin d'accès aux ressources AWS, et les développeurs
 ont en général plus de droits que nécessaire. C'est donc le meilleur endroit pour détecter
@@ -86,7 +86,7 @@ Git, secrets du dépôt, ou en dur dans une configuration de pipeline.
 
 Reste la question du nombre. Elle dépend de la maturité de l'organisation, mais le principe
 est simple : un token doit permettre de savoir quel actif a été compromis. Donc un token
-distinct par dépôt. Sinon l'alerte dit qu'on est entré, sans dire par où.
+distinct par dépôt. Sinon l'alerte signale l'intrusion sans en indiquer la source.
 
 ### Workloads applicatifs
 
@@ -101,20 +101,21 @@ déclencher plusieurs d'un coup.
 
 Les développeurs devraient utiliser des credentials temporaires plutôt que des clés d'accès.
 Déployer un token sur chaque poste de l'entreprise est théoriquement possible, mais coûteux
-en logistique et difficile à exploiter : on saura qu'un poste a été compromis, pas lequel.
+en logistique et difficile à exploiter : l'alerte indiquerait qu'un poste a été compromis,
+sans préciser lequel.
 
 ## Test en conditions réelles
 
-J'ai poussé une clé d'accès AWS sur un dépôt GitHub public. Premier bot six minutes plus
+Une clé d'accès AWS a été poussée sur un dépôt GitHub public. Premier bot six minutes plus
 tard.
 
-Les outils utilisés sont automatiques, du TruffleHog et équivalents, et ils ratissent en
-continu. C'est bruyant et facile à détecter, ce qui est exactement le comportement qu'on
-cherche à piéger.
+Les outils en cause sont automatiques (TruffleHog et équivalents) et ratissent en continu. Ce
+comportement, bruyant et facile à détecter, est précisément celui que le dispositif cherche à
+piéger.
 
 ## Quand l'alerte sonne
 
-Le token dit qu'il y a quelqu'un. Il ne dit pas comment il est entré.
+Le token signale une présence. Il n'indique pas le vecteur d'entrée.
 
 La première chose à faire est de remonter à la source de la compromission dans les logs, pour
 identifier quel collaborateur ou quelle application a fuité. Ensuite, rotation immédiate de

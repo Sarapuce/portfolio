@@ -1,0 +1,33 @@
+---
+import Base from "../layouts/Base.astro";
+import Nav from "../components/Nav.astro";
+import { site } from "../data/site";
+---
+
+<Base title={`CV — ${site.nom}`} description="Le CV n'est pas encore disponible.">
+  <Nav />
+
+  <main class="max-w-3xl mx-auto px-6 py-32 text-center">
+    <p class="text-xs tracking-[0.2em] uppercase text-muted mb-6">CV</p>
+    <h1
+      class="font-display font-medium text-bone text-4xl sm:text-5xl leading-tight mb-6"
+    >
+      Pas encore disponible
+    </h1>
+    <p class="text-muted max-w-md mx-auto mb-10">
+      Le CV n'est pas encore en ligne. En attendant, le détail des missions se trouve dans les
+      sections du site, ou sur demande par mail.
+    </p>
+    <div class="flex flex-wrap items-center justify-center gap-x-8 gap-y-4 text-sm">
+      <a
+        href="/"
+        class="text-bone border-b border-accent pb-1 hover:text-accent transition-colors"
+      >
+        Retour à l'accueil
+      </a>
+      <a href={`mailto:${site.email}`} class="hover:text-bone transition-colors">
+        Me contacter
+      </a>
+    </div>
+  </main>
+</Base>
