@@ -18,6 +18,9 @@ const termData = JSON.stringify({
     "certifs.txt": site.terminal.certifs,
     "flag.txt": ["SARAPUCE{3asY_fl4G}"],
   },
+  secret: {
+    ilovesarapuce: ["SARAPUCE{m3diUm_fl4g}"],
+  },
 });
 ---
 
@@ -137,6 +140,7 @@ const termData = JSON.stringify({
       const data = JSON.parse(dataEl.textContent || "{}");
       const fichiers: Record<string, string[]> = data.fichiers || {};
       const whoami: string[] = data.whoami || [];
+      const secret: Record<string, string[]> = data.secret || {};
 
       const ligne = (texte: string, cls: string) => {
         const p = document.createElement("p");
@@ -185,6 +189,8 @@ const termData = JSON.stringify({
           }
         } else if (nom === "help") {
           bloc.append(ligne("commandes : ls, cat, whoami, clear", "text-muted/60"));
+        } else if (nom && secret[nom]) {
+          secret[nom].forEach((l) => bloc.append(ligne(l, "text-accent")));
         } else if (nom) {
           bloc.append(ligne("zsh: command not found: " + nom, "text-muted/60"));
         }
