@@ -9,6 +9,7 @@ constats:
 conclusion: "Un runner CI/CD compromis suffit à récupérer le service account cluster-admin, sans avoir à compromettre le nœud qui le porte."
 tags: ["Kubernetes", "GKE", "EKS", "Autoscaling", "IDOR", "SSTIC"]
 ordre: 1
+date: "2025-06"
 perimetre: "GKE & EKS"
 duree: "SSTIC 2025"
 dureeDetail: "avec Paul Viossat"

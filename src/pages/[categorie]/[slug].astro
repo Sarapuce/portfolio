@@ -28,10 +28,24 @@ const meta = [
   { cle: lib.duree, val: d.duree, detail: d.dureeDetail, accent: false },
   { cle: lib.verdict, val: d.verdict, detail: d.verdictDetail, accent: true },
 ].filter((m) => m.val);
+
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "TechArticle",
+  headline: titre,
+  description: resume,
+  url: new URL(Astro.url.pathname, Astro.site).href,
+  author: { "@type": "Person", name: site.nom, url: "https://sarapuce.fr" },
+  publisher: { "@type": "Person", name: site.nom },
+  keywords: tags.join(", "),
+  ...(d.date ? { datePublished: d.date } : {}),
+};
 ---
 
-<Base title={`${titre} — ${site.nom}`} description={resume}>
+<Base title={`${titre} — ${site.nom}`} description={resume} ogType="article">
   <Nav />
+  <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} is:inline />
+
 
   <article class="max-w-3xl mx-auto px-6 py-20">
     <a

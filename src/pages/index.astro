@@ -5,6 +5,26 @@ import Hero from "../components/Hero.astro";
 import CategorieSection from "../components/CategorieSection.astro";
 import Contact from "../components/Contact.astro";
 import { categories } from "../data/categories";
+import { site } from "../data/site";
+
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Person",
+      name: site.nom,
+      jobTitle: "Auditeur FinOps & sécurité cloud",
+      url: "https://sarapuce.fr",
+      description: site.description,
+      sameAs: [site.linkedin, site.github, site.rootme],
+    },
+    {
+      "@type": "WebSite",
+      name: site.nom,
+      url: "https://sarapuce.fr",
+    },
+  ],
+};
 ---
 
 <Base>
@@ -14,4 +34,5 @@ import { categories } from "../data/categories";
     {categories.map((c) => <CategorieSection categorie={c} />)}
     <Contact />
   </main>
+  <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} is:inline />
 </Base>

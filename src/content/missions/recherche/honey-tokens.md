@@ -9,6 +9,7 @@ constats:
 conclusion: "Six minutes entre la publication d'une clé sur GitHub et la première tentative de connexion."
 tags: ["Honey tokens", "GGCanary", "Terraform", "Detection", "CI/CD"]
 ordre: 2
+date: "2023-10"
 perimetre: "Comptes AWS"
 duree: "Blog Theodo Cloud"
 dureeDetail: "octobre 2023"

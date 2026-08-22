@@ -18,6 +18,7 @@ const missions = defineCollection({
     verdict: z.string().optional(),
     verdictDetail: z.string().optional(),
     etiquette: z.string().optional(),
+    date: z.string().optional(),
   }),
 });
 
