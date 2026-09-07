@@ -23,7 +23,7 @@ export const categories: Categorie[] = [
     id: "finops",
     label: "FinOps",
     tagline:
-      "Où part votre budget cloud, et ce qu'on peut récupérer sans coupure en prod.",
+      "Analyse de la facture, identification des postes récupérables, application sans interruption de service.",
     couleur: {
       texte: "text-finops",
       point: "bg-finops",
@@ -34,7 +34,7 @@ export const categories: Categorie[] = [
     id: "securite",
     label: "Sécurité Cloud",
     tagline:
-      "Vos failles avant qu'on ne les trouve pour vous, et la conformité sans surprise.",
+      "Modélisation des menaces, recherche des chemins de compromission, priorisation des correctifs.",
     couleur: {
       texte: "text-secu",
       point: "bg-secu",
@@ -44,7 +44,7 @@ export const categories: Categorie[] = [
   {
     id: "recherche",
     label: "Recherche & publications",
-    tagline: "Ce que je cherche en dehors des missions, et ce que j'en publie.",
+    tagline: "Travaux de recherche et publications, menés hors missions client.",
     libelles: {
       perimetre: "Cible",
       duree: "Publication",
