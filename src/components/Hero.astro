@@ -18,9 +18,18 @@ const termData = JSON.stringify({
     "certifs.txt": site.terminal.certifs,
     "flag.txt": ["SARAPUCE{3asY_fl4G}"],
   },
-  secret: {
-    ilovesarapuce: ["SARAPUCE{m3diUm_fl4g}"],
+  caches: {
+    ".bash_history": [
+      "whoami",
+      "cat stack.txt",
+      "cat certifs.txt",
+      "echo aWxvdmVzYXJhcHVjZQ== | base64 -d | sh",
+      "cat flag.txt",
+      "clear",
+    ],
   },
+  secret: "3a2d3d37352622371a1d46070c3c0130100947060f",
+  xss: "2b32213923263b36081047211c2c0b4d462c1e1f471f0e",
 });
 ---
 
@@ -139,8 +148,28 @@ const termData = JSON.stringify({
 
       const data = JSON.parse(dataEl.textContent || "{}");
       const fichiers: Record<string, string[]> = data.fichiers || {};
+      const caches: Record<string, string[]> = data.caches || {};
       const whoami: string[] = data.whoami || [];
-      const secret: Record<string, string[]> = data.secret || {};
+      const secret: string = data.secret || "";
+      const xss: string = data.xss || "";
+
+      const histo: string[] = caches[".bash_history"] || (caches[".bash_history"] = []);
+      let curseur = histo.length;
+
+      const dechiffrer = (hex: string, cle: string) => {
+        if (!hex || !cle) return "";
+        let out = "";
+        for (let i = 0; i < hex.length; i += 2) {
+          const octet = parseInt(hex.slice(i, i + 2), 16);
+          out += String.fromCharCode(octet ^ cle.charCodeAt((i / 2) % cle.length));
+        }
+        return out;
+      };
+
+      const CHARGES = [
+        /<script\b[^>]*>[\s\S]*?alert\s*\([\s\S]*?(?:<\/script\s*>|$)/gi,
+        /<[a-z][a-z0-9]*\b[^>]*\bon[a-z]+\s*=\s*[^>]*alert\s*\([^>]*>?/gi,
+      ];
 
       const ligne = (texte: string, cls: string) => {
         const p = document.createElement("p");
@@ -157,13 +186,32 @@ const termData = JSON.stringify({
         const invite = document.createElement("span");
         invite.className = "text-muted/50";
         invite.textContent = "$ ";
+        let reste = brut;
+        let injection = false;
+        CHARGES.forEach((motif) => {
+          motif.lastIndex = 0;
+          if (motif.test(reste)) {
+            injection = true;
+            motif.lastIndex = 0;
+            reste = reste.replace(motif, "");
+          }
+        });
+
         const cmd = document.createElement("span");
         cmd.className = "text-accent";
-        cmd.textContent = brut;
+        cmd.textContent = reste;
         echo.append(invite, cmd);
         bloc.append(echo);
 
-        const args = brut.trim().split(/\s+/).filter(Boolean);
+        if (injection) {
+          out.append(bloc);
+          body.scrollTop = body.scrollHeight;
+          // laisse le terminal se repeindre avant la modale bloquante
+          setTimeout(() => window.alert(dechiffrer(xss, "xss")), 60);
+          return;
+        }
+
+        const args = reste.trim().split(/\s+/).filter(Boolean);
         const nom = args[0];
 
         if (nom === "clear") {
@@ -173,26 +221,36 @@ const termData = JSON.stringify({
         if (nom === "whoami") {
           whoami.forEach((l) => bloc.append(ligne(l, "text-bone")));
         } else if (nom === "ls") {
-          bloc.append(ligne(Object.keys(fichiers).join("  "), "text-bone"));
+          const tout = args.slice(1).some((o) => /^-[a-z]*a/.test(o));
+          const liste = tout ? [...Object.keys(caches), ...Object.keys(fichiers)] : Object.keys(fichiers);
+          bloc.append(ligne(liste.join("  "), "text-bone"));
         } else if (nom === "cat") {
           const cibles = args.slice(1);
           if (cibles.length === 0) {
             bloc.append(ligne("cat: missing file operand", "text-muted/60"));
           } else {
             cibles.forEach((f) => {
-              if (fichiers[f]) {
-                fichiers[f].forEach((l) => bloc.append(ligne(l, "text-bone")));
+              const contenu = fichiers[f] || caches[f];
+              if (contenu) {
+                contenu.forEach((l) => bloc.append(ligne(l, "text-bone")));
               } else {
                 bloc.append(ligne("cat: " + f + ": No such file or directory", "text-muted/60"));
               }
             });
           }
+        } else if (nom === "history") {
+          histo.forEach((l, i) =>
+            bloc.append(ligne(String(i + 1).padStart(5, " ") + "  " + l, "text-bone")),
+          );
         } else if (nom === "help") {
           bloc.append(ligne("commandes : ls, cat, whoami, clear", "text-muted/60"));
-        } else if (nom && secret[nom]) {
-          secret[nom].forEach((l) => bloc.append(ligne(l, "text-accent")));
         } else if (nom) {
-          bloc.append(ligne("zsh: command not found: " + nom, "text-muted/60"));
+          const clair = dechiffrer(secret, nom);
+          if (clair.startsWith("SARAPUCE{")) {
+            bloc.append(ligne(clair, "text-bone"));
+          } else {
+            bloc.append(ligne("zsh: command not found: " + nom, "text-muted/60"));
+          }
         }
 
         out.append(bloc);
@@ -203,7 +261,17 @@ const termData = JSON.stringify({
         const val = input.value;
         input.value = "";
         executer(val);
+        if (val.trim() && val !== histo[histo.length - 1]) histo.push(val);
+        curseur = histo.length;
         body.scrollTop = body.scrollHeight;
+      });
+
+      input.addEventListener("keydown", (e) => {
+        if (e.key !== "ArrowUp" && e.key !== "ArrowDown") return;
+        e.preventDefault();
+        curseur = Math.max(0, Math.min(histo.length, curseur + (e.key === "ArrowUp" ? -1 : 1)));
+        input.value = histo[curseur] ?? "";
+        requestAnimationFrame(() => input.setSelectionRange(input.value.length, input.value.length));
       });
 
       body.addEventListener("click", () => {
