@@ -1,0 +1,26 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["config:recommended"],
+  "timezone": "Europe/Paris",
+  "schedule": ["before 6am on monday"],
+  "labels": ["dependencies"],
+  "prConcurrentLimit": 3,
+  "packageRules": [
+    {
+      "matchPackageNames": ["astro", "/^@astrojs//"],
+      "groupName": "astro"
+    },
+    {
+      "matchPackageNames": ["tailwindcss", "/^@tailwindcss//"],
+      "groupName": "tailwind"
+    },
+    {
+      "matchPackageNames": ["/^@fontsource//"],
+      "groupName": "fontsource"
+    }
+  ],
+  "lockFileMaintenance": {
+    "enabled": true,
+    "schedule": ["before 6am on the first day of the month"]
+  }
+}
